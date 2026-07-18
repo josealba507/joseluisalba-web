@@ -10,6 +10,8 @@ import Base from '../../layouts/Base.astro';
   activeNav="about"
 >
   <section class="wrap page">
+    <h1>Acerca de mí</h1>
+
     <div class="prose intro">
       <p>
         Trabajo con datos desde 2013, casi siempre en lugares donde un número mal tiene
@@ -35,7 +37,7 @@ import Base from '../../layouts/Base.astro';
       </p>
     </div>
 
-    <h1>Qué busco</h1>
+    <h2>Qué busco</h2>
 
     <div class="prose">
       <p>
@@ -60,6 +62,14 @@ import Base from '../../layouts/Base.astro';
     font-size: clamp(2rem, 4vw, 3rem);
     letter-spacing: -0.02em;
     margin: 0 0 32px;
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.6875rem;
+    letter-spacing: -0.015em;
+    margin: 0 0 20px;
   }
 
   .prose {
