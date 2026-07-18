@@ -6,28 +6,18 @@ import Base from '../../layouts/Base.astro';
   lang="es"
   altUrl="/about/"
   title="Acerca de · José Luis Alba"
-  description="Ingeniero de datos senior en Panamá. 13 años entre banca, seguros y retail: SAP BW, data warehouse de riesgo, IFRS 9 en PySpark."
+  description="Ingeniero de datos senior en Ciudad de Panamá, abierto a roles full-time remotos — overlap completo con el horario del este de US."
   activeNav="about"
 >
   <section class="wrap page">
-    <p class="eyebrow">Borrador — en verificación</p>
-    <h1>Acerca de</h1>
+    <h1>Qué busco</h1>
 
     <div class="prose">
       <p>
-        Soy ingeniero de datos senior, trabajo remoto desde Panamá desde 2013 en banca, seguros y
-        retail. Mi trabajo vive donde un número mal tiene consecuencias reales: reportería de
-        riesgo, cálculos regulatorios, sistemas que sobreviven un cambio de core.
-      </p>
-      <p>
-        Retail — soporte a una expansión regional en varios países sobre SAP BW. Banca — un data
-        warehouse de riesgo llevado a través de una migración de core, y un cálculo de pérdida
-        esperada de IFRS 9 reconstruido en PySpark. [Cifra concreta pendiente de Sportline]. [Cifra
-        concreta pendiente de IFRS 9].
-      </p>
-      <p>
-        Hoy divido mi tiempo entre proyectos de cliente y mi propio producto — este sitio es donde
-        escribo las decisiones detrás de ambos.
+        Un rol full-time remoto como ingeniero de datos senior. Estoy en Ciudad de Panamá — UTC-5,
+        con overlap completo con el horario del este de US, y sin visa ni reubicación de por medio.
+        Si estás contratando, <a href="/es/contacto/">hablemos</a> o búscame en
+        <a href="https://www.linkedin.com/in/joseluisalba/" target="_blank" rel="noopener">LinkedIn</a>.
       </p>
     </div>
   </section>
@@ -37,16 +27,6 @@ import Base from '../../layouts/Base.astro';
   .page {
     padding-block: clamp(3rem, 6vw, 4.5rem);
     max-width: 760px;
-  }
-
-  .eyebrow {
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--orange);
-    margin: 0 0 12px;
   }
 
   h1 {
@@ -64,6 +44,11 @@ import Base from '../../layouts/Base.astro';
   }
 
   .prose p {
-    margin: 0 0 24px;
+    margin: 0;
+  }
+
+  .prose a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 </style>

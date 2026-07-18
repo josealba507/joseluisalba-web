@@ -163,9 +163,12 @@ src/
       `.github/workflows/` existe pero está vacía.
 - [ ] `public/.htaccess` con los 301 de los 8 posts viejos de WordPress —
       no existe todavía.
-- [ ] `/about/` y `/es/sobre-mi/`: siguen BORRADOR — faltan las cifras
-      concretas de Sportline y de IFRS 9 (marcadas con `[Cifra concreta
-      pendiente...]` directo en el HTML para que sean fáciles de encontrar).
+- [x] `/about/` y `/es/sobre-mi/` — reemplazadas (2026-07-18) por el copy
+      real que dio el usuario ("What I'm looking for"/"Qué busco": rol
+      full-time remoto, Panamá UTC-5, sin visa/reubicación, CTA a
+      `/contact/` y a LinkedIn). Ya no son las del borrador con cifras
+      pendientes de Sportline/IFRS 9 — ese ángulo (bio larga con casos) se
+      descartó a favor de un pitch corto de disponibilidad.
 - [ ] Endpoint real del formulario de contacto — hoy `contact.astro`/
       `es/contacto.astro` son un `mailto:` simple, no un formulario.
 - [ ] Reemplazar/borrar el post de ejemplo (`draft: true`,
@@ -174,7 +177,8 @@ src/
 - [ ] Probar el deploy en subdominio (`beta.joseluisalba.com`) antes de
       cambiar el dominio real.
 - [ ] Vaciar el WordPress viejo de `public_html` antes de publicar.
-- [ ] LinkedIn real en el footer — hoy `href="#"` (no se inventó una URL).
+- [x] LinkedIn real: `https://www.linkedin.com/in/joseluisalba/` — ya
+      linkeado en el footer (todas las páginas) y en About/Acerca de.
 
 ## Cómo trabajar en este proyecto
 - Repo separado de RanchOS — no reutilizar convenciones/decisiones de ese
