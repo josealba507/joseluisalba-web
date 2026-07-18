@@ -1,0 +1,153 @@
+---
+import '../styles/global.css';
+import { t, routes, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  altUrl: string;
+  title: string;
+  description: string;
+  activeNav?: 'blog' | 'about' | 'contact';
+}
+
+const { lang, altUrl, title, description, activeNav } = Astro.props;
+const tr = t(lang);
+
+const currentUrl = new URL(Astro.url.pathname, Astro.site);
+const otherUrl = new URL(altUrl, Astro.site);
+const enUrl = lang === 'en' ? currentUrl : otherUrl;
+const esUrl = lang === 'es' ? currentUrl : otherUrl;
+
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={currentUrl} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="es" href={esUrl} />
+    <link rel="alternate" hreflang="x-default" href={enUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a href={routes.home(lang)} class="brand">José Luis Alba</a>
+      <nav class="site-nav">
+        <a href={routes.blog(lang)} class={activeNav === 'blog' ? 'active' : ''}>{tr('nav.blog')}</a>
+        <a href={routes.about(lang)} class={activeNav === 'about' ? 'active' : ''}>{tr('nav.about')}</a>
+        <a href={routes.contact(lang)} class={activeNav === 'contact' ? 'active' : ''}>{tr('nav.contact')}</a>
+        <span class="sep">|</span>
+        <span class="lang-switch">
+          <a href={enUrl.pathname} class={lang === 'en' ? 'is-current' : ''}>EN</a>
+          <a href={esUrl.pathname} class={lang === 'es' ? 'is-current' : ''}>ES</a>
+        </span>
+      </nav>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <span>© {year} · {tr('footer.built')}</span>
+      <span class="footer-links">
+        <a href="https://github.com/josealba507" target="_blank" rel="noopener">{tr('footer.github')}</a>
+        <a href="#" aria-disabled="true">{tr('footer.linkedin')}</a>
+        <a href={routes.rss(lang)}>{tr('footer.rss')}</a>
+      </span>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 56px;
+    border-bottom: 1px solid var(--ink);
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .brand {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+  }
+
+  .site-nav {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+
+  .site-nav a {
+    color: var(--ink);
+  }
+
+  .site-nav a.active {
+    color: var(--orange);
+    border-bottom: 2px solid var(--orange);
+    padding-bottom: 2px;
+  }
+
+  .sep {
+    color: var(--rule-strong);
+  }
+
+  .lang-switch {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  .lang-switch a {
+    color: var(--ink-40);
+  }
+
+  .lang-switch a.is-current {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .site-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 56px;
+    border-top: 1px solid var(--ink);
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--ink-55);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 28px;
+  }
+
+  .footer-links a {
+    color: var(--ink-55);
+  }
+
+  @media (max-width: 640px) {
+    .site-header,
+    .site-footer {
+      padding-inline: 20px;
+    }
+  }
+</style>

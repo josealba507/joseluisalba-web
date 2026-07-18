@@ -1,0 +1,56 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+
+<Base
+  lang="es"
+  altUrl="/contact/"
+  title="Contacto · José Luis Alba"
+  description="Escribime — abierto a roles remotos de ingeniería de datos senior."
+  activeNav="contact"
+>
+  <section class="wrap page">
+    <h1>Contacto</h1>
+    <p class="dek">Abierto a roles remotos de ingeniería de datos senior. Panamá, UTC-5.</p>
+    <a class="mail-cta" href="mailto:josealba507@gmail.com">josealba507@gmail.com</a>
+    <p class="note">Un formulario de contacto real está en camino — este link de mailto funciona hoy.</p>
+  </section>
+</Base>
+
+<style>
+  .page {
+    padding-block: clamp(3rem, 6vw, 4.5rem);
+    max-width: 760px;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(2rem, 4vw, 3rem);
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+  }
+
+  .dek {
+    font-size: 1.125rem;
+    line-height: 1.55;
+    color: var(--ink-70);
+    margin: 0 0 32px;
+  }
+
+  .mail-cta {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 1.0625rem;
+    color: var(--ink);
+    border-bottom: 2px solid var(--orange);
+    padding-bottom: 4px;
+  }
+
+  .note {
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    color: var(--ink-40);
+    margin: 24px 0 0;
+  }
+</style>

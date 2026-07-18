@@ -13,17 +13,33 @@ apliques patrones ni supuestos de ese otro proyecto acá (Firebase, Firestore,
 BigQuery, vanilla JS SPA, etc. no existen en este repo).
 
 ## Estado actual (2026-07-18)
-Proyecto recién arrancado, todavía no es un repo git. Scaffold parcial:
-- **Existe:** `src/pages/index.astro`, `src/pages/es/index.astro`,
-  `src/pages/rss.xml.js`, `README.md`.
-- **Falta (referenciado por los archivos existentes pero sin crear
-  todavía):** `package.json`, `astro.config.mjs`, `src/layouts/Base.astro`,
-  `src/layouts/Post.astro` (si aplica), `src/components/PostIndex.astro`,
-  `src/i18n/ui.ts`, config de content collections (`src/content/config.ts`),
-  `src/styles/global.css`, `public/.htaccess`, y el workflow de GitHub
-  Actions (`.github/workflows/` existe como carpeta pero está vacía).
-- No asumas que algo del scaffold ya funciona sin verificar que el archivo
-  exista primero.
+Repo en GitHub: `josealba507/joseluisalba-web` (público). Scaffold Astro
+completo y funcional — `npm install && npm run dev` levanta el sitio,
+`npm run build` compila sin errores (verificado). Home (en/es), plantilla de
+artículo, índice de blog (en/es), About/Contact (en/es) y RSS (en/es) ya
+existen y renderizan. `public/.htaccess` y el workflow real de GitHub
+Actions (`.github/workflows/`) todavía NO existen — ver Pendientes.
+
+**Diseño visual importado desde Claude Design** (2026-07-18): el sistema
+visual (paleta, tipografía, layout de header/footer/hero/índice/artículo)
+viene de un mockup en `claude.ai/design`, proyecto "Portafolio técnico
+senior en datos" (`668f178f-d135-44cc-ade4-d53f600e64f0`), archivo
+`Sitio Personal.dc.html`, importado vía el MCP `DesignSync`. El copy real
+(hero, dek, nombre) y la estructura de navegación (Blog/About/Contact) son
+los ya definidos en este documento — del mockup solo se tomó el vestido
+visual, no su copy de ejemplo ("D. Herrera") ni su IA (Writing/Work/About).
+Si se vuelve a tocar el diseño, ese proyecto de Claude Design sigue siendo
+la fuente de verdad visual — no reinventar paleta/tipografía a mano.
+
+**Detalle no obvio para trabajar con `astro:content` en este proyecto:**
+`CollectionEntry.id` incluye la extensión del archivo (`"en/slug.md"`);
+`CollectionEntry.slug` NO la incluye (`"en/slug"`). Todas las funciones que
+arman URLs (`postUrl()` en `src/i18n/ui.ts`, los `getStaticPaths()` de
+`src/pages/blog/[slug].astro` y `src/pages/es/blog/[slug].astro`, y los
+`link` de ambos `rss.xml.js`) usan `.slug`, nunca `.id`, para esto — usar
+`.id` genera URLs rotas con `.md` en la ruta (bug real encontrado y
+corregido durante la implementación de este scaffold, confirmado con el
+servidor de dev devolviendo 404 hasta el fix).
 
 ## Stack
 - **Astro** (sitio 100% estático). `npm run dev` → `localhost:4321`.
@@ -83,15 +99,27 @@ tiempo, publicar solo en inglés (el lector #1 lee ahí) y dejar el español
 para después — nunca al revés.
 
 ## Diseño
-- **Paleta:** negro, blanco, naranja `#FF6600`. El naranja **no decora**:
-  marca estructura (la regla del eyebrow, el subrayado activo, el sustantivo
-  del argumento en la portada). Si un naranja no señala nada estructural, se
-  quita.
-- **Tipografía:** Space Grotesk (display), Inter (texto), JetBrains Mono
-  (metadatos). La etiqueta mono sobre cada título es la firma visual del
-  sitio — cada pieza se anuncia por su tipo antes que por su nombre.
-- El índice de posts es una **tabla, no tarjetas** — fecha y tipo son datos,
-  se muestran como tales.
+Fuente de verdad: el proyecto de Claude Design referenciado arriba en
+"Estado actual". Tokens ya portados a `src/styles/global.css`:
+- **Paleta:** tinta `#111110` (`--ink`), papel `#FCFBF9` (`--paper`, fondo
+  real del sitio), naranja `#FF6600` (`--orange`), más una escala de grises
+  cálidos para texto secundario (`--ink-70/55/40`) y hairlines (`--rule`,
+  `--rule-strong`). `--canvas` (`#E9E7E3`) es el fondo del LIENZO de Claude
+  Design detrás de las pantallas del mockup — nunca el fondo real del
+  sitio, no usarlo como tal. El naranja **no decora**: marca estructura
+  (regla del eyebrow, subrayado activo del nav, el sustantivo del
+  argumento en el H1). Si un naranja no señala nada estructural, se quita.
+- **Tipografía:** Archivo (`--display`, headings/nav/botones), Source
+  Serif 4 (`--serif`, cuerpo — es el font-family por defecto del `body`),
+  IBM Plex Mono (`--mono`, eyebrows/metadatos/fechas/nav). La etiqueta mono
+  sobre cada título es la firma visual del sitio — cada pieza se anuncia
+  por su tipo antes que por su nombre.
+- El índice de posts (`PostIndex.astro`) es una lista editorial con fecha y
+  tiempo de lectura alineados a la derecha como datos — no tarjetas.
+- El artículo (`Post.astro`) numera dentro de su propio `eyebrow`
+  (`DECISION · №01`, calculado por orden cronológico ascendente dentro del
+  mismo tipo) y muestra "Next in {eyebrow}" al final si existe un post
+  posterior del mismo tipo.
 
 ## Configurar el deploy (cuando se retome)
 En Hostinger (hPanel → Archivos → Cuentas FTP), crear una cuenta FTP para el
@@ -111,32 +139,42 @@ bien, recién apuntar a `public_html`.
 vaciar `public_html`. El workflow no borra `wp-content/` — no dejar el
 WordPress viejo colgando debajo del sitio nuevo.
 
-## Estructura de carpetas (objetivo, ver "Estado actual" para qué existe hoy)
+## Estructura de carpetas (estado real, 2026-07-18)
 ```
 src/
-  content/blog/en/*.md    Posts en inglés
-  content/blog/es/*.md    Posts en español
-  i18n/ui.ts              Strings, rutas y helpers de idioma
-  pages/                  Inglés (raíz) + es/ (español)
-  layouts/                Base + Post
-  styles/global.css       Tokens: negro, blanco, #FF6600
-public/.htaccess          301s de los posts viejos + caché
+  content/config.ts       Schema de la colección blog (zod)
+  content/blog/en/*.md    Posts en inglés (hoy: 1 de ejemplo, draft:true)
+  content/blog/es/*.md    Posts en español (ídem)
+  i18n/ui.ts              Diccionario, rutas por idioma, postUrl()
+  utils.ts                readingTime()
+  pages/                  Inglés (raíz) + es/ (español) — home, blog,
+                           blog/[slug], about/sobre-mi, contact/contacto,
+                           rss.xml
+  layouts/Base.astro      Header (nav + selector EN/ES) + footer, hreflang
+  layouts/Post.astro      Plantilla de artículo (usa Base)
+  components/PostIndex.astro   Lista de posts (usada en home y /blog/)
+  styles/global.css       Tokens de diseño + fuentes de Google Fonts
+.claude/launch.json       Config del dev server (npm run dev, puerto 4321)
 ```
+`public/.htaccess` todavía no existe (ver Pendientes).
 
 ## Pendientes conocidos
-- [ ] Scaffold base: `package.json`, `astro.config.mjs`, `Base.astro`,
-      `PostIndex.astro`, `i18n/ui.ts`, content collection config,
-      `global.css` — nada de esto existe todavía.
 - [ ] Workflow de GitHub Actions (build + FTP deploy) — la carpeta
       `.github/workflows/` existe pero está vacía.
-- [ ] `/about/` y `/es/sobre-mi/`: serán BORRADOR hasta verificar cada frase
-      y llenar los `[ ]` — falta un número concreto en Sportline y otro en
-      el IFRS 9.
-- [ ] Endpoint real del formulario en `contact.astro` y `es/contacto.astro`.
-- [ ] Post 1: quitar `draft: true` cuando esté escrito.
-- [ ] Probar en subdominio antes de cambiar el dominio real.
-- [ ] Vaciar el WordPress viejo de `public_html`.
-- [ ] Inicializar git (`git init`) — no es un repo todavía.
+- [ ] `public/.htaccess` con los 301 de los 8 posts viejos de WordPress —
+      no existe todavía.
+- [ ] `/about/` y `/es/sobre-mi/`: siguen BORRADOR — faltan las cifras
+      concretas de Sportline y de IFRS 9 (marcadas con `[Cifra concreta
+      pendiente...]` directo en el HTML para que sean fáciles de encontrar).
+- [ ] Endpoint real del formulario de contacto — hoy `contact.astro`/
+      `es/contacto.astro` son un `mailto:` simple, no un formulario.
+- [ ] Reemplazar/borrar el post de ejemplo (`draft: true`,
+      `src/content/blog/en/template-example.md` +
+      `es/ejemplo-plantilla.md`) por el primer post real.
+- [ ] Probar el deploy en subdominio (`beta.joseluisalba.com`) antes de
+      cambiar el dominio real.
+- [ ] Vaciar el WordPress viejo de `public_html` antes de publicar.
+- [ ] LinkedIn real en el footer — hoy `href="#"` (no se inventó una URL).
 
 ## Cómo trabajar en este proyecto
 - Repo separado de RanchOS — no reutilizar convenciones/decisiones de ese

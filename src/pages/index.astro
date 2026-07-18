@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import PostIndex from '../components/PostIndex.astro';
-import { t } from '../i18n/ui';
+import { t, routes } from '../i18n/ui';
 
 const tr = t('en');
 
@@ -28,31 +28,33 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
       down the decisions — the numbers behind them, what I traded away, and what broke anyway.
     </p>
 
-    <dl class="hero__stack">
-      <div>
-        <dt>Ingestion &amp; transformation</dt>
-        <dd>BigQuery · dbt · Python · PySpark</dd>
-      </div>
-      <div>
-        <dt>Governance &amp; quality</dt>
-        <dd>DAMA/DMBOK · Lineage · Data contracts</dd>
-      </div>
-      <div>
-        <dt>Domain</dt>
-        <dd>Banking · Insurance · Regulatory reporting</dd>
-      </div>
-    </dl>
-
     <p class="hero__avail">
       Open to remote senior data engineering roles. Panama is UTC-5 — full overlap with US Eastern,
       no visa required, no timezone theater.
     </p>
   </section>
 
+  <section class="stack wrap">
+    <div class="stack__row">
+      <span class="stack__label">Ingestion &amp; transformation</span>
+      <span class="stack__items">BigQuery · dbt · Python · PySpark</span>
+    </div>
+    <div class="stack__row">
+      <span class="stack__label">Governance &amp; quality</span>
+      <span class="stack__items">DAMA/DMBOK · Lineage · Data contracts</span>
+    </div>
+    <div class="stack__row">
+      <span class="stack__label">Domain</span>
+      <span class="stack__items">Banking · Insurance · Regulatory reporting</span>
+    </div>
+  </section>
+
   <section class="wrap latest">
-    <h2 class="latest__title">{tr('blog.latest')}</h2>
+    <div class="latest__head">
+      <h2 class="latest__title">{tr('blog.latest')}</h2>
+      <a href={routes.blog('en')} class="latest__more">{tr('blog.all')}</a>
+    </div>
     <PostIndex posts={posts} lang="en" />
-    <p class="latest__more"><a href="/blog/">{tr('blog.all')}</a></p>
   </section>
 </Base>
 
@@ -61,46 +63,39 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
     padding-block: clamp(4rem, 12vw, 8rem) clamp(3rem, 8vw, 5rem);
   }
 
-  .hero h1 {
-    max-width: 20ch;
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    color: var(--orange);
+    margin: 0 0 28px;
   }
 
-  .hero h1 em {
+  h1 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(2.25rem, 5vw, 4rem);
+    line-height: 1.04;
+    letter-spacing: -0.025em;
+    margin: 0;
+    max-width: 19ch;
+    text-wrap: balance;
+  }
+
+  h1 em {
     font-style: normal;
-    /* Único naranja de la portada. Marca dónde está el argumento:
+    /* Único naranja del H1. Marca dónde está el argumento:
        cualquiera construye pipelines, pocos los sostienen en operación. */
     color: var(--orange);
   }
 
   .hero__dek {
-    font-size: clamp(1.0625rem, 2vw, 1.25rem);
+    font-size: clamp(1.0625rem, 2vw, 1.3125rem);
+    line-height: 1.55;
     color: var(--ink-70);
     max-width: 58ch;
-    margin: 1.75rem 0 0;
-  }
-
-  .hero__stack {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-    gap: 1.5rem 2.5rem;
-    margin: 3.5rem 0 0;
-    padding-top: 2rem;
-    border-top: 1px solid var(--rule);
-  }
-
-  .hero__stack dt {
-    font-family: var(--mono);
-    font-size: 0.6875rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--ink-40);
-    margin-bottom: 0.4rem;
-  }
-
-  .hero__stack dd {
-    margin: 0;
-    font-size: 0.9375rem;
-    font-weight: 500;
+    margin: 2rem 0 0;
   }
 
   .hero__avail {
@@ -114,27 +109,68 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
     border-left: 2px solid var(--orange);
   }
 
+  .stack {
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding-block: 4px;
+  }
+
+  .stack__row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 8px 40px;
+    padding: 20px 0;
+  }
+
+  .stack__row + .stack__row {
+    border-top: 1px solid var(--rule);
+  }
+
+  .stack__label {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-40);
+  }
+
+  .stack__items {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--ink);
+  }
+
   .latest {
-    padding-block: 1rem;
+    padding-block: clamp(3rem, 6vw, 4.5rem);
+  }
+
+  .latest__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 12px;
   }
 
   .latest__title {
     font-family: var(--mono);
-    font-size: 0.6875rem;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--ink-40);
-    margin: 0 0 1rem;
+    color: var(--ink);
+    margin: 0;
   }
 
   .latest__more {
     font-family: var(--mono);
-    font-size: 0.75rem;
-    margin: 1.75rem 0 0;
+    font-size: 13px;
+    color: var(--ink-55);
   }
 
-  .latest__more a {
-    text-decoration: none;
+  @media (max-width: 640px) {
+    .stack__row {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
   }
 </style>

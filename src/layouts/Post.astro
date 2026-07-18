@@ -1,0 +1,240 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Base from './Base.astro';
+import { t, type Lang } from '../i18n/ui';
+import { readingTime } from '../utils';
+
+interface Props {
+  entry: CollectionEntry<'blog'>;
+  lang: Lang;
+  altUrl: string;
+  number: number;
+  translatedPostUrl?: string | null;
+  nextPost?: { title: string; url: string } | null;
+}
+
+const { entry, lang, altUrl, number, translatedPostUrl, nextPost } = Astro.props;
+const { Content } = await entry.render();
+const tr = t(lang);
+
+const dateFormatter = new Intl.DateTimeFormat(lang === 'es' ? 'es' : 'en', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+
+const eyebrowLabel = entry.data.eyebrow.toUpperCase();
+const numberLabel = String(number).padStart(2, '0');
+---
+
+<Base lang={lang} altUrl={altUrl} title={`${entry.data.title} · José Luis Alba`} description={entry.data.description} activeNav="blog">
+  <article>
+    <header class="article-header wrap-narrow">
+      <p class="eyebrow">{eyebrowLabel} · №{numberLabel}</p>
+      <h1>{entry.data.title}</h1>
+      <p class="dek">{entry.data.description}</p>
+      <div class="meta">
+        <span>{dateFormatter.format(entry.data.pubDate)}</span>
+        <span>{readingTime(entry.body)} {tr('post.minRead')}</span>
+        {
+          translatedPostUrl && (
+            <span>
+              {tr('post.alsoIn')}{' '}
+              <a href={translatedPostUrl}>{tr('post.alsoInLang')}</a>
+            </span>
+          )
+        }
+      </div>
+    </header>
+
+    <div class="prose wrap-narrow">
+      <Content />
+    </div>
+
+    {
+      nextPost && (
+        <div class="next-in">
+          <div class="wrap-narrow">
+            <p class="next-in__label">
+              {tr('post.nextIn')} {eyebrowLabel}
+            </p>
+            <a href={nextPost.url} class="next-in__title">
+              {nextPost.title} →
+            </a>
+          </div>
+        </div>
+      )
+    }
+  </article>
+</Base>
+
+<style>
+  .wrap-narrow {
+    max-width: 760px;
+    margin-inline: auto;
+    padding-inline: 56px;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 640px) {
+    .wrap-narrow {
+      padding-inline: 20px;
+    }
+  }
+
+  .article-header {
+    padding-top: 80px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: var(--orange);
+    margin: 0 0 18px;
+  }
+
+  .article-header h1 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin: 0 0 20px;
+    text-wrap: balance;
+  }
+
+  .dek {
+    font-size: 1.25rem;
+    line-height: 1.55;
+    color: var(--ink-55);
+    font-style: italic;
+    margin: 0 0 28px;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--ink-40);
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .meta a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .prose {
+    padding: 44px 56px 48px;
+    font-size: 1.15625rem;
+    line-height: 1.7;
+    color: var(--ink-80);
+  }
+
+  @media (max-width: 640px) {
+    .prose {
+      padding: 32px 20px 40px;
+    }
+  }
+
+  .prose :global(p) {
+    margin: 0 0 26px;
+  }
+
+  .prose :global(h2) {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.6875rem;
+    letter-spacing: -0.015em;
+    margin: 44px 0 18px;
+  }
+
+  .prose :global(h3) {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.375rem;
+    letter-spacing: -0.01em;
+    margin: 36px 0 16px;
+  }
+
+  .prose :global(a) {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .prose :global(blockquote) {
+    margin: 36px 0;
+    padding-left: 24px;
+    border-left: 3px solid var(--orange);
+    font-style: italic;
+    color: var(--ink-70);
+  }
+
+  .prose :global(blockquote p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .prose :global(pre) {
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.65;
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 24px 28px;
+    margin: 0 0 26px;
+    overflow-x: auto;
+  }
+
+  .prose :global(code) {
+    font-family: var(--mono);
+    font-size: 0.87em;
+  }
+
+  .prose :global(:not(pre) > code) {
+    background: var(--inline-code-bg);
+    padding: 1px 6px;
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin: 0 0 26px;
+    padding-left: 1.4em;
+  }
+
+  .prose :global(li) {
+    margin-bottom: 8px;
+  }
+
+  .prose :global(img) {
+    margin: 32px 0;
+  }
+
+  .next-in {
+    border-top: 1px solid var(--ink);
+  }
+
+  .next-in__label {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-40);
+    margin: 36px 0 16px;
+  }
+
+  .next-in__title {
+    display: block;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.375rem;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    padding-bottom: 56px;
+  }
+</style>

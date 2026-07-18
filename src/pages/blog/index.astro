@@ -1,0 +1,41 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PostIndex from '../../components/PostIndex.astro';
+import { t } from '../../i18n/ui';
+
+const tr = t('en');
+
+const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/') && !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<Base
+  lang="en"
+  altUrl="/es/blog/"
+  title={`${tr('blog.allTitle')} · José Luis Alba`}
+  description="All posts: cases, decisions, governance notes and short notes on building data systems."
+  activeNav="blog"
+>
+  <section class="wrap head">
+    <h1>{tr('blog.allTitle')}</h1>
+  </section>
+  <section class="wrap">
+    <PostIndex posts={posts} lang="en" />
+  </section>
+</Base>
+
+<style>
+  .head {
+    padding-block: 4rem 1rem;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(2rem, 4vw, 3rem);
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+</style>

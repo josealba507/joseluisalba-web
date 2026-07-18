@@ -1,0 +1,116 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { Lang } from '../i18n/ui';
+import { postUrl, t } from '../i18n/ui';
+import { readingTime } from '../utils';
+
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+  lang: Lang;
+}
+
+const { posts, lang } = Astro.props;
+const tr = t(lang);
+
+const dateFormatter = new Intl.DateTimeFormat(lang === 'es' ? 'es' : 'en', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+---
+
+<div class="post-index">
+  {
+    posts.map((post) => (
+      <article class="post-row">
+        <div>
+          <p class="eyebrow" style={{ color: post.data.eyebrow === 'Case' ? 'var(--orange)' : 'var(--ink)' }}>
+            {post.data.eyebrow}
+          </p>
+          <h3>
+            <a href={postUrl(lang, post.slug)}>{post.data.title}</a>
+          </h3>
+          <p class="dek">{post.data.description}</p>
+        </div>
+        <div class="meta">
+          <span>{dateFormatter.format(post.data.pubDate)}</span>
+          <span>
+            {readingTime(post.body)} {tr('post.minRead')}
+          </span>
+        </div>
+      </article>
+    ))
+  }
+  {posts.length === 0 && <p class="empty">—</p>}
+</div>
+
+<style>
+  .post-row {
+    display: grid;
+    grid-template-columns: 1fr 160px;
+    gap: 40px;
+    align-items: baseline;
+    padding: 32px 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    margin: 0 0 10px;
+  }
+
+  .post-row h3 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    margin: 0 0 10px;
+  }
+
+  .post-row h3 a {
+    color: var(--ink);
+  }
+
+  .dek {
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--ink-55);
+    margin: 0;
+    max-width: 62ch;
+  }
+
+  .meta {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--ink-40);
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .empty {
+    padding: 32px 0;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-40);
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+
+  @media (max-width: 640px) {
+    .post-row {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .meta {
+      flex-direction: row;
+      text-align: left;
+      gap: 16px;
+    }
+  }
+</style>
