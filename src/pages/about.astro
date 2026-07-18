@@ -10,6 +10,32 @@ import Base from '../layouts/Base.astro';
   activeNav="about"
 >
   <section class="wrap page">
+    <div class="prose intro">
+      <p>
+        I've worked with data since 2013, mostly in places where a wrong number has consequences.
+        At a regional retailer I took a SAP BW warehouse from one country to a multi-country
+        operation — multi-currency, with a security model where each country sees its own numbers
+        and nothing else.
+      </p>
+      <p>
+        At a bank, I rebuilt the risk data warehouse during a core banking migration:
+        reconstructing the feeds while the source system underneath was being replaced. The part
+        I'm proudest of came out of that migration. The IFRS 9 expected-loss calculation ran on
+        SQL Server — but once we moved to Hadoop, relational code couldn't do the job anymore. We
+        tried Python; on ~200,000 loans it ran out of room. PySpark was what actually solved it. I
+        didn't reach for distributed computing because it was fashionable — I reached for it
+        because nothing else finished the run.
+      </p>
+      <p>
+        Today I'm a senior data engineer at Credicorp Bank. Outside the bank I build my own
+        product: RanchOS, a herd-management system used by real operations — everything from the
+        data model to the analytics pipeline on BigQuery and dbt. It's where I test in production
+        the decisions I write about here. I'm also working through the DMBOK with a DAMA study
+        group, applying it to a system I actually own, which turns out to be a very different
+        exercise than applying it to a slide.
+      </p>
+    </div>
+
     <h1>What I'm looking for</h1>
 
     <div class="prose">
@@ -45,6 +71,16 @@ import Base from '../layouts/Base.astro';
 
   .prose p {
     margin: 0;
+  }
+
+  .prose.intro {
+    margin-bottom: 56px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .prose.intro p + p {
+    margin-top: 24px;
   }
 
   .prose a {

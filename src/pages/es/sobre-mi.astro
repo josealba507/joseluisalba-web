@@ -10,6 +10,31 @@ import Base from '../../layouts/Base.astro';
   activeNav="about"
 >
   <section class="wrap page">
+    <div class="prose intro">
+      <p>
+        Trabajo con datos desde 2013, casi siempre en lugares donde un número mal tiene
+        consecuencias. En un retail regional llevé un data warehouse en SAP BW de un país a una
+        operación multipaís — multimoneda, con un modelo de seguridad donde cada país ve sus
+        números y nada más.
+      </p>
+      <p>
+        En un banco reconstruí el data warehouse de riesgo durante una migración de core bancario:
+        rehacer las cargas mientras cambiaban el sistema fuente por debajo. De esa migración salió
+        lo que más me enorgullece. El cálculo de pérdida esperada de IFRS 9 corría en SQL Server —
+        pero al pasar a Hadoop, el código relacional ya no daba. Probamos Python; sobre ~200.000
+        préstamos se quedó corto. PySpark fue lo que de verdad lo resolvió. No usé cómputo
+        distribuido porque estuviera de moda: lo usé porque nada más terminaba la corrida.
+      </p>
+      <p>
+        Hoy soy ingeniero de datos senior en Credicorp Bank. Fuera del banco construyo producto
+        propio: RanchOS, un sistema de manejo de hato que usan operaciones reales — desde el modelo
+        de datos hasta el pipeline analítico en BigQuery y dbt. Es donde pruebo en producción las
+        decisiones que escribo acá. También estoy leyendo el DMBOK con un grupo de estudio de DAMA,
+        aplicándolo a un sistema que me pertenece, que resulta ser un ejercicio muy distinto a
+        aplicarlo sobre una lámina.
+      </p>
+    </div>
+
     <h1>Qué busco</h1>
 
     <div class="prose">
@@ -45,6 +70,16 @@ import Base from '../../layouts/Base.astro';
 
   .prose p {
     margin: 0;
+  }
+
+  .prose.intro {
+    margin-bottom: 56px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .prose.intro p + p {
+    margin-top: 24px;
   }
 
   .prose a {
