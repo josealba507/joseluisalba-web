@@ -159,8 +159,19 @@ src/
 `public/.htaccess` todavía no existe (ver Pendientes).
 
 ## Pendientes conocidos
-- [ ] Workflow de GitHub Actions (build + FTP deploy) — la carpeta
-      `.github/workflows/` existe pero está vacía.
+- [x] Workflow de GitHub Actions (`.github/workflows/deploy.yml`,
+      2026-07-18) — push a `main` corre `npm ci && npm run build` y sube
+      `dist/` a Hostinger vía FTP con `SamKirkland/FTP-Deploy-Action@v4.3.5`
+      (también disparable a mano desde la pestaña Actions,
+      `workflow_dispatch`). **No borra archivos existentes en el servidor**
+      (sin `dangerous-clean-slate`) — a propósito, para no arrasar
+      `wp-content/` del WordPress viejo antes de vaciarlo a mano. **Todavía
+      NO corrió ni una vez**: le faltan los 4 secrets
+      (`FTP_SERVER`/`FTP_USERNAME`/`FTP_PASSWORD`/`FTP_REMOTE_DIR`, ver
+      tabla arriba) — Claude nunca los carga (son credenciales), el usuario
+      los agrega a mano en GitHub → Settings → Secrets and variables →
+      Actions. Hasta que eso pase, cualquier push a `main` va a fallar el
+      job de deploy (el build sí va a pasar).
 - [ ] `public/.htaccess` con los 301 de los 8 posts viejos de WordPress —
       no existe todavía.
 - [x] `/about/` y `/es/sobre-mi/` — reemplazadas (2026-07-18) por el copy
