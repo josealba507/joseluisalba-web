@@ -1,0 +1,140 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PostIndex from '../components/PostIndex.astro';
+import { t } from '../i18n/ui';
+
+const tr = t('en');
+
+const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/') && !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 6);
+---
+
+<Base
+  lang="en"
+  altUrl="/es/"
+  title="José Luis Alba · Senior Data Engineer"
+  description="Senior data engineer in Panama. Since 2013: SAP BW across borders, a risk warehouse through a core migration, IFRS 9 in PySpark. I write down the decisions I make while building."
+>
+  <section class="hero wrap">
+    <p class="eyebrow">Senior Data Engineer · Panama · UTC-5</p>
+
+    <h1>I build data pipelines that survive contact with <em>the operation</em>.</h1>
+
+    <p class="hero__dek">
+      Since 2013, mostly in places where a wrong number has consequences: a retailer going regional,
+      and a bank replacing its core. Now I'm doing it on my own product too. This is where I write
+      down the decisions — the numbers behind them, what I traded away, and what broke anyway.
+    </p>
+
+    <dl class="hero__stack">
+      <div>
+        <dt>Ingestion &amp; transformation</dt>
+        <dd>BigQuery · dbt · Python · PySpark</dd>
+      </div>
+      <div>
+        <dt>Governance &amp; quality</dt>
+        <dd>DAMA/DMBOK · Lineage · Data contracts</dd>
+      </div>
+      <div>
+        <dt>Domain</dt>
+        <dd>Banking · Insurance · Regulatory reporting</dd>
+      </div>
+    </dl>
+
+    <p class="hero__avail">
+      Open to remote senior data engineering roles. Panama is UTC-5 — full overlap with US Eastern,
+      no visa required, no timezone theater.
+    </p>
+  </section>
+
+  <section class="wrap latest">
+    <h2 class="latest__title">{tr('blog.latest')}</h2>
+    <PostIndex posts={posts} lang="en" />
+    <p class="latest__more"><a href="/blog/">{tr('blog.all')}</a></p>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding-block: clamp(4rem, 12vw, 8rem) clamp(3rem, 8vw, 5rem);
+  }
+
+  .hero h1 {
+    max-width: 20ch;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    /* Único naranja de la portada. Marca dónde está el argumento:
+       cualquiera construye pipelines, pocos los sostienen en operación. */
+    color: var(--orange);
+  }
+
+  .hero__dek {
+    font-size: clamp(1.0625rem, 2vw, 1.25rem);
+    color: var(--ink-70);
+    max-width: 58ch;
+    margin: 1.75rem 0 0;
+  }
+
+  .hero__stack {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1.5rem 2.5rem;
+    margin: 3.5rem 0 0;
+    padding-top: 2rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  .hero__stack dt {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-40);
+    margin-bottom: 0.4rem;
+  }
+
+  .hero__stack dd {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+
+  .hero__avail {
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    color: var(--ink-70);
+    max-width: 52ch;
+    margin: 2rem 0 0;
+    padding-left: 0.9rem;
+    border-left: 2px solid var(--orange);
+  }
+
+  .latest {
+    padding-block: 1rem;
+  }
+
+  .latest__title {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-40);
+    margin: 0 0 1rem;
+  }
+
+  .latest__more {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    margin: 1.75rem 0 0;
+  }
+
+  .latest__more a {
+    text-decoration: none;
+  }
+</style>

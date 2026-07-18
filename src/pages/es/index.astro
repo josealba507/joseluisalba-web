@@ -1,0 +1,122 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PostIndex from '../../components/PostIndex.astro';
+import { t } from '../../i18n/ui';
+
+const tr = t('es');
+
+const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('es/') && !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 6);
+---
+
+<Base
+  lang="es"
+  altUrl="/"
+  title="José Luis Alba · Ingeniero de datos"
+  description="Ingeniero de datos senior en Panamá. Desde 2013: SAP BW a nivel regional, migración del DW de Riesgo por cambio de core, IFRS 9 en PySpark. Escribo las decisiones que tomo construyendo."
+>
+  <section class="hero wrap">
+    <p class="eyebrow">Ingeniero de datos senior · Panamá</p>
+
+    <h1>Construyo pipelines que sobreviven al contacto con <em>la operación</em>.</h1>
+
+    <p class="hero__dek">
+      Desde 2013, casi siempre donde un número mal tiene consecuencias: un retail saliendo a la
+      región, un banco cambiando su core. Hoy también lo hago en producto propio. Acá escribo las
+      decisiones: los números detrás, lo que cedí, y lo que se rompió igual.
+    </p>
+
+    <dl class="hero__stack">
+      <div>
+        <dt>Ingesta y transformación</dt>
+        <dd>BigQuery · dbt · Python · PySpark</dd>
+      </div>
+      <div>
+        <dt>Gobierno y calidad</dt>
+        <dd>DAMA/DMBOK · Linaje · Contratos de datos</dd>
+      </div>
+      <div>
+        <dt>Dominio</dt>
+        <dd>Banca · Seguros · Reportería regulatoria</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="wrap latest">
+    <h2 class="latest__title">{tr('blog.latest')}</h2>
+    <PostIndex posts={posts} lang="es" />
+    <p class="latest__more"><a href="/es/blog/">{tr('blog.all')}</a></p>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding-block: clamp(4rem, 12vw, 8rem) clamp(3rem, 8vw, 5rem);
+  }
+
+  .hero h1 {
+    max-width: 20ch;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--orange);
+  }
+
+  .hero__dek {
+    font-size: clamp(1.0625rem, 2vw, 1.25rem);
+    color: var(--ink-70);
+    max-width: 58ch;
+    margin: 1.75rem 0 0;
+  }
+
+  .hero__stack {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1.5rem 2.5rem;
+    margin: 3.5rem 0 0;
+    padding-top: 2rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  .hero__stack dt {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-40);
+    margin-bottom: 0.4rem;
+  }
+
+  .hero__stack dd {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+
+  .latest {
+    padding-block: 1rem;
+  }
+
+  .latest__title {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-40);
+    margin: 0 0 1rem;
+  }
+
+  .latest__more {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    margin: 1.75rem 0 0;
+  }
+
+  .latest__more a {
+    text-decoration: none;
+  }
+</style>
