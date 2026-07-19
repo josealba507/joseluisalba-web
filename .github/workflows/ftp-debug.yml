@@ -1,0 +1,16 @@
+name: FTP Debug
+
+on:
+  workflow_dispatch:
+
+jobs:
+  list-remote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: List remote root
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          curl -s --user "$FTP_USERNAME:$FTP_PASSWORD" "ftp://$FTP_SERVER/"
