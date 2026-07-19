@@ -1,0 +1,86 @@
+name: FTP Fix Permissions
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fix-permissions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: List current permissions (before)
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          curl -s --user "$FTP_USERNAME:$FTP_PASSWORD" "ftp://$FTP_SERVER/"
+
+      - name: Set folders to 755, files to 644 (recursive)
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          python3 - <<'PYEOF'
+          import ftplib, os
+
+          server = os.environ['FTP_SERVER']
+          user = os.environ['FTP_USERNAME']
+          password = os.environ['FTP_PASSWORD']
+
+          ftp = ftplib.FTP(server, timeout=30)
+          ftp.login(user, password)
+
+          def list_dir(path):
+              entries = []
+              lines = []
+              try:
+                  ftp.retrlines(f'MLSD {path}', lines.append)
+                  for line in lines:
+                      facts, _, name = line.partition(' ')
+                      if name in ('.', '..'):
+                          continue
+                      fact_dict = dict(f.split('=', 1) for f in facts.rstrip(';').split(';') if '=' in f)
+                      is_dir = fact_dict.get('type') == 'dir'
+                      entries.append((name, is_dir))
+                  return entries
+              except ftplib.error_perm:
+                  pass
+              lines = []
+              ftp.retrlines(f'LIST {path}', lines.append)
+              for line in lines:
+                  parts = line.split(None, 8)
+                  if len(parts) < 9:
+                      continue
+                  perm = parts[0]
+                  name = parts[8]
+                  if name in ('.', '..'):
+                      continue
+                  entries.append((name, perm.startswith('d')))
+              return entries
+
+          def walk_and_chmod(path):
+              for name, is_dir in list_dir(path):
+                  full = f"{path}/{name}" if path else name
+                  mode = '755' if is_dir else '644'
+                  try:
+                      ftp.sendcmd(f'SITE CHMOD {mode} {full}')
+                      print(f'chmod {mode} {full}')
+                  except Exception as e:
+                      print(f'FAILED chmod {full}: {e}')
+                  if is_dir:
+                      walk_and_chmod(full)
+
+          ftp.sendcmd('SITE CHMOD 755 .')
+          print('chmod 755 .')
+          walk_and_chmod('')
+          ftp.quit()
+          PYEOF
+
+      - name: List permissions (after)
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          curl -s --user "$FTP_USERNAME:$FTP_PASSWORD" "ftp://$FTP_SERVER/"
