@@ -250,11 +250,11 @@ src/
       `home/` (carpeta anidada huérfana del primer intento de deploy) y
       `default.php` (placeholder de Hostinger) de `public_html/` a mano
       desde el File Manager.
-- [ ] Revisar permisos de archivos/carpetas en el servidor — durante el
-      diagnóstico del 403 se les dio permiso de escritura a "otros" de
-      más (quedaron en `777`-ish), más abierto de lo necesario. No es la
-      causa de ningún bug conocido, pero conviene volver a `755`
-      (carpetas) / `644` (archivos) por prolijidad de seguridad.
+- [x] Permisos de archivos/carpetas en el servidor — corregidos
+      (2026-07-19) a `755` (carpetas) / `644` (archivos) en todo
+      `public_html/`, recursivo, vía un workflow temporal de un solo uso
+      con `ftplib` de Python (`SITE CHMOD` recorriendo el árbol completo
+      con MLSD/LIST) — ya borrado, mismo patrón que `ftp-debug.yml`.
 
 ## Cómo trabajar en este proyecto
 - Repo separado de RanchOS — no reutilizar convenciones/decisiones de ese
