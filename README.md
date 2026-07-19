@@ -65,23 +65,16 @@ npm run dev     # http://localhost:4321
 npm run build
 ```
 
-## Configurar el deploy
+## Deploy
 
-En Hostinger (hPanel → Archivos → Cuentas FTP), crea una cuenta FTP para el dominio.
-En GitHub → Settings → Secrets and variables → Actions:
+Ya está en producción (`https://joseluisalba.com`). Push a `main` dispara el workflow
+`.github/workflows/deploy.yml`, que compila y sube `dist/` por FTP.
 
-| Secret | Valor |
-|---|---|
-| `FTP_SERVER` | Host FTP de Hostinger (ej. `ftp.joseluisalba.com`) |
-| `FTP_USERNAME` | Usuario FTP |
-| `FTP_PASSWORD` | Contraseña FTP |
-| `FTP_REMOTE_DIR` | Normalmente `/public_html/` — verifícalo en hPanel |
-
-Prueba primero contra un subdominio (`beta.joseluisalba.com`). Cuando esté bien, apuntas
-a `public_html`.
-
-**Antes de publicar:** desinstala WordPress del dominio o vacía `public_html`. El workflow
-no borra `wp-content/`, y no quieres el WordPress viejo colgando debajo del sitio nuevo.
+Los 4 secrets (`FTP_SERVER`/`FTP_USERNAME`/`FTP_PASSWORD`/`FTP_REMOTE_DIR`) ya están
+cargados en GitHub → Settings → Secrets and variables → Actions. Si hay que tocarlos de
+nuevo (cuenta FTP nueva, etc.), ver **CLAUDE.md → "Deploy real a Hostinger"** — tiene el
+detalle de por qué los valores no son los "obvios" (el usuario FTP del dominio viene con
+chroot, así que `FTP_REMOTE_DIR` es `/`, no `/public_html/`) y cómo se diagnosticó.
 
 ## Estructura
 
@@ -110,9 +103,11 @@ El índice es una tabla, no tarjetas. Fecha y tipo son datos.
 
 ## Pendientes
 
-- [ ] `/about/` y `/es/sobre-mi/`: son BORRADOR. Verifica cada frase y llena los `[ ]`
-      — falta un número concreto en Sportline y otro en el IFRS 9
-- [ ] Endpoint real del formulario en `contact.astro` y `es/contacto.astro`
-- [ ] Post 1: quitar `draft: true` cuando esté escrito
-- [ ] Probar en subdominio antes de cambiar el dominio
-- [ ] Vaciar el WordPress viejo de `public_html`
+- [ ] Endpoint real del formulario en `contact.astro` y `es/contacto.astro` (hoy es un
+      `mailto:` simple)
+- [ ] Post 1: reemplazar el post de ejemplo (`draft: true`) por el primero real
+- [ ] `public/.htaccess`: agregar los 301 de los 8 posts viejos de WordPress
+- [ ] Limpieza cosmética en el servidor: borrar `home/` y `default.php`, que quedaron de
+      la migración (ver CLAUDE.md)
+
+Detalle completo, incluida la configuración real del deploy, en `CLAUDE.md`.
