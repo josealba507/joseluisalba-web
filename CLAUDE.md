@@ -305,15 +305,22 @@ src/
       pipeline automático ya está resuelto. Si vuelve a fallar, el
       camino manual (`npm run build` local + arrastrar `dist/` al File
       Manager específico del sitio) sigue siendo el fallback probado.
-- [ ] Limpieza de carpetas/archivos sueltos que quedaron de la Ronda 2 de
-      diagnóstico — sin urgencia (no rompen nada, no son la carpeta que
-      sirve el sitio): `test-upload.txt` y `.ftp-deploy-sync-state.json`
-      en la carpeta correcta; y en la(s) carpeta(s) `public_html`
-      "equivocada(s)" que se identificaron en el camino (ver punto 8 de
-      la saga), quedaron `home/`, `default.php`, `DO_NOT_UPLOAD_HERE` y
-      los favicons/`.htaccess` de intentos previos — se pueden dejar
-      así (no las lee nadie) o limpiar a mano si el usuario quiere
-      prolijidad.
+- [x] Limpieza de la carpeta correcta (2026-07-20) — se sacaron
+      `test-upload.txt`, `.ftp-deploy-sync-state.json`, y archivos de
+      repo que habían quedado públicamente expuestos por una subida
+      manual que incluyó de más (`package.json`, `package-lock.json`,
+      `tsconfig.json`, `astro.config.mjs`, `README.md`, `CLAUDE.md`,
+      `.gitignore`). Confirmado por HTTP que `package.json`/`CLAUDE.md`
+      ya dan 404 públicamente, y que el sitio sigue en 200 en todas las
+      páginas. Quedó solo lo que corresponde: `about/`, `blog/`,
+      `contact/`, `es/`, `images/`, `.htaccess`, `favicon*`,
+      `index.html`, `rss.xml`.
+- [ ] Sin urgencia — en la(s) carpeta(s) `public_html` "equivocada(s)"
+      que se identificaron en el camino de la Ronda 2 (ver punto 8 de la
+      saga, distintas de la carpeta real de arriba), quedaron `home/`,
+      `default.php`, `DO_NOT_UPLOAD_HERE` y favicons/`.htaccess` de
+      intentos previos — no las sirve nadie, se pueden dejar así o
+      limpiar a mano si el usuario quiere prolijidad total.
 - [ ] `public/.htaccess` con los 301 de los 8 posts viejos de WordPress —
       hoy solo tiene `DirectoryIndex`, sin esos redirects todavía.
 - [x] Favicon (`public/favicon.svg` + PNGs, monograma "JA") — **en
