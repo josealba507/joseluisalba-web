@@ -132,13 +132,22 @@ cuenta multi-dominio (la misma donde está `albaanalytics.com`) en vez de
 redirigir DNS — decisión suya, ver el hilo de esa conversación si hace falta
 el razonamiento de costo/beneficio.
 
-### Secrets de GitHub Actions — valores que SÍ funcionan
+### Secrets de GitHub Actions — valores confirmados (actualizado 2026-07-19, ronda 2)
 | Secret | Valor real que funciona | Por qué no es lo "obvio" |
 |---|---|---|
 | `FTP_SERVER` | `joseluisalba.com` (sin `ftp://`, sin espacios, sin `/` final) | hPanel muestra el valor como `ftp://joseluisalba.com` en la pantalla de detalles — ese prefijo NO va en el secret. |
-| `FTP_USERNAME` | El usuario FTP **específico del dominio** (con formato `NNNNNNNNN.joseluisalba.com`, no el usuario maestro de la cuenta) | Este usuario viene con **chroot**: al conectarse por FTP ya arranca parado directo en la carpeta del sitio. |
+| `FTP_USERNAME` | El usuario FTP **"del sistema"** (el que Hostinger asigna por defecto a la cuenta, distinto del usuario específico del dominio que se probó primero) | El primer usuario probado (formato `NNNNNNNNN.joseluisalba.com`, con chroot) llevaba a una carpeta que NO es la que sirve el sitio realmente — ver punto 8 de la saga abajo. |
 | `FTP_PASSWORD` | La contraseña de ese usuario FTP | — |
-| `FTP_REMOTE_DIR` | **`/`** (un solo carácter, la barra — NO `/public_html/`) | Por el chroot de arriba: `/public_html/` no existe *dentro* de esa carpeta ya-encerrada — apuntar ahí da "acceso denegado". Poner la ruta larga (`/domains/joseluisalba.com/public_html/`) tampoco sirve: el cliente FTP la crea como carpeta nueva DENTRO del chroot, generando una carpeta huérfana anidada que nadie sirve (esto pasó de verdad, ver más abajo). |
+| `FTP_REMOTE_DIR` | **`/public_html/`** (con el usuario "del sistema" — NO uses este valor si volvés a cambiar a un usuario chroot específico de dominio, ver tabla de contexto en el punto 8) | Ni `/` a secas ni la ruta larga `/domains/joseluisalba.com/public_html/` corresponden a la carpeta que el servidor web realmente lee — confirmado con una prueba destructiva (ver punto 8). |
+
+**Antes de tocar estos valores de nuevo:** la carpeta correcta se confirmó
+con una prueba irrefutable — el usuario borró el contenido de
+`Sitios Web → joseluisalba.com → Manage → File Manager` (el acceso
+específico de ESE sitio, no el explorador general de la cuenta) y la
+página pública pasó a dar "no existe". Si en el futuro hay dudas de nuevo
+sobre la ruta correcta, repetir esa misma prueba (borrar con backup
+primero) es más confiable que cualquier comparación de tamaños/timestamps
+por FTP — ver por qué en el punto 8.
 
 ### La saga completa (para no repetir el diagnóstico si vuelve a pasar)
 1. **Primer intento** con `FTP_REMOTE_DIR=/domains/joseluisalba.com/public_html/`
@@ -195,6 +204,73 @@ el razonamiento de costo/beneficio.
    ruta incorrecta por el chroot) en minutos cada uno, sin necesitar ver
    los valores reales.
 
+### Ronda 2 (agregar favicon reveló que la ruta seguía sin ser la correcta)
+Al agregar el favicon del sitio (`public/favicon.svg` + PNGs, ver sección
+Diseño), el deploy automático via GitHub Actions reportaba éxito una y
+otra vez, pero el sitio público nunca cambiaba. Esto llevó a un segundo
+diagnóstico, más largo que el primero:
+
+8. **Hallazgo central: existen VARIAS carpetas llamadas (o mostradas
+   como) `public_html` en esta cuenta, anidadas entre sí, y solo UNA es
+   la real.** Se identificaron al menos 3 candidatas distintas navegando
+   por hPanel (`Home` de la cuenta → `public_html` → otra `public_html`
+   anidada adentro → sección `domains/joseluisalba.com/public_html/` del
+   explorador general), cada una con contenido ligeramente distinto
+   (tamaños de `index.html` distintos: 9.7 KB vs 9.52 KB). Comparar
+   tamaños/timestamps por FTP **no alcanzó** para determinar cuál era la
+   real — la única prueba que lo confirmó sin ambigüedad fue **borrar el
+   contenido de una candidata (con backup primero) y confirmar que el
+   sitio público se rompía** (pasó a "no existe"). Esa fue la técnica que
+   finalmente identificó la carpeta correcta: el acceso específico del
+   sitio vía `Sitios Web → joseluisalba.com → Manage → File Manager`
+   (no el explorador general de archivos de la cuenta, que puede mostrar
+   una vista distinta/anidada de la misma cuenta).
+9. **El mecanismo de deploy automático (tanto `SamKirkland/FTP-Deploy-Action`
+   como `lftp mirror`) resultó poco confiable contra esta cuenta
+   específica de Hostinger — reportaba éxito sin haber escrito nada, o se
+   colgaba indefinidamente:**
+   - Se cambió de `FTP-Deploy-Action` (Node.js) a `lftp mirror` pensando
+     que el problema era del cliente — confirmado que NO era eso: `lftp`
+     también reportó "Sync complete" con cero cambios reales en el
+     servidor (verificado con una lectura FTP inmediata después, no
+     confiando en el log de la propia herramienta).
+   - Subidas de UN solo archivo chico vía `lftp put` sí funcionaron de
+     forma consistente (verificado varias veces, con contenido
+     confirmado byte a byte). El patrón sugiere que el canal de datos
+     FTP (no el de control) es inestable contra este servidor
+     específico bajo ciertas condiciones — degradándose con
+     `mirror`/transferencias en lote, no con transferencias individuales.
+   - Una corrida del `mirror` completo llegó a colgarse **más de 10
+     minutos** (contra los <1 minuto normales) y hubo que cancelarla a
+     mano vía la API de GitHub. Se le agregó `timeout-minutes: 8` al job
+     y `net:timeout`/`net:max-retries` a `lftp`, y se sacó
+     `--parallel=3` (sospecha de que las conexiones paralelas agravan el
+     problema contra este servidor) — pero **esto no está
+     comprobadamente resuelto**, ver Pendientes.
+10. **Lección aparte, real y confirmada: el HTML de la portada tiene
+    caché de página en el servidor que NO se invalida solo con subir un
+    archivo nuevo, a diferencia de los assets estáticos (imágenes/SVG).**
+    Se subieron los 3 archivos de favicon manualmente y quedaron
+    accesibles al instante (200 OK, contenido correcto) — pero
+    `index.html` en la carpeta correcta se sobrescribió manualmente
+    *dos veces* antes de que el sitio público reflejara el cambio (las
+    etiquetas `<link rel="icon">` en el `<head>`). Ni parámetros
+    anti-caché en la URL (`?nocache=...`) ni pegarle directo a la IP del
+    hosting evitaron ver la versión vieja en el medio. **No se identificó
+    la causa exacta** (¿LiteSpeed Cache con caché de página activado?
+    ¿algo más específico de esta cuenta?) — quedó resuelto por fuerza
+    bruta (subir de nuevo), no diagnosticado a fondo. Si vuelve a pasar
+    que un cambio de HTML no se refleja pese a estar confirmado en el
+    servidor, **repetir la subida del archivo una segunda vez** antes de
+    seguir buscando causas más profundas.
+11. **Estado actual del pipeline automático: NO confiable todavía.**
+    El deploy manual (build local + arrastrar `dist/` al File Manager
+    específico del sitio, reemplazando existentes) es, a la fecha de
+    este registro, el único método probado consistentemente exitoso.
+    `deploy.yml` sigue existiendo y puede intentarse, pero cualquier
+    corrida debe verificarse después contra el sitio público (no confiar
+    en el "✓" de GitHub Actions) — ver Pendientes.
+
 ## Estructura de carpetas (estado real, 2026-07-18)
 ```
 src/
@@ -215,19 +291,36 @@ src/
 `public/.htaccess` todavía no existe (ver Pendientes).
 
 ## Pendientes conocidos
-- [x] Workflow de GitHub Actions (`.github/workflows/deploy.yml`) — **EN
-      PRODUCCIÓN y confirmado funcionando** (2026-07-19): push a `main` (o
-      `workflow_dispatch` manual) corre `npm ci && npm run build` y sube
-      `dist/` a Hostinger vía FTP con `SamKirkland/FTP-Deploy-Action@v4.3.5`.
-      Los 4 secrets están cargados con los valores correctos — ver la
-      sección "Deploy real a Hostinger" arriba para el detalle de cada uno
-      y por qué costó tanto llegar a esos valores. **No borra archivos
-      existentes en el servidor** (sin `dangerous-clean-slate`), así que
-      `home/` (chroot huérfano) y `default.php` (placeholder de Hostinger)
-      siguen ahí sin molestar — limpiarlos a mano cuando haya tiempo, no
-      es urgente.
+- [ ] **Validar que el deploy 100% automático (push → GitHub Actions →
+      FTP) realmente funciona de punta a punta — NO confirmado todavía.**
+      Después de la Ronda 2 (ver sección de deploy arriba), la ruta
+      correcta cambió (`FTP_REMOTE_DIR=/public_html/` con el usuario
+      "del sistema", no `/` con el usuario chroot del dominio) y el
+      mecanismo (`lftp mirror`) mostró comportamiento poco confiable
+      (éxito reportado sin cambios reales, o cuelgues de +10 min). El
+      sitio está al día en producción hoy porque se subió el build a
+      mano. La próxima vez que se necesite desplegar un cambio, probar
+      primero con `workflow_dispatch` y **verificar contra el sitio
+      público** (no confiar en el ✓ de Actions) antes de asumir que el
+      pipeline automático ya está resuelto. Si vuelve a fallar, el
+      camino manual (`npm run build` local + arrastrar `dist/` al File
+      Manager específico del sitio) sigue siendo el fallback probado.
+- [ ] Limpieza de carpetas/archivos sueltos que quedaron de la Ronda 2 de
+      diagnóstico — sin urgencia (no rompen nada, no son la carpeta que
+      sirve el sitio): `test-upload.txt` y `.ftp-deploy-sync-state.json`
+      en la carpeta correcta; y en la(s) carpeta(s) `public_html`
+      "equivocada(s)" que se identificaron en el camino (ver punto 8 de
+      la saga), quedaron `home/`, `default.php`, `DO_NOT_UPLOAD_HERE` y
+      los favicons/`.htaccess` de intentos previos — se pueden dejar
+      así (no las lee nadie) o limpiar a mano si el usuario quiere
+      prolijidad.
 - [ ] `public/.htaccess` con los 301 de los 8 posts viejos de WordPress —
       hoy solo tiene `DirectoryIndex`, sin esos redirects todavía.
+- [x] Favicon (`public/favicon.svg` + PNGs, monograma "JA") — **en
+      producción y confirmado** (2026-07-19), después de la Ronda 2 de
+      diagnóstico de deploy. Ver sección de Diseño para el detalle del
+      favicon en sí, y la sección de deploy para la saga completa de por
+      qué costó tanto que llegara a verse en vivo.
 - [x] `/about/` y `/es/sobre-mi/` — reemplazadas (2026-07-18) por el copy
       real que dio el usuario ("What I'm looking for"/"Qué busco": rol
       full-time remoto, Panamá UTC-5, sin visa/reubicación, CTA a
@@ -246,15 +339,15 @@ src/
       en vez de redirigir DNS, así que no aplicaba.
 - [x] LinkedIn real: `https://www.linkedin.com/in/joseluisalba/` — ya
       linkeado en el footer (todas las páginas) y en About/Acerca de.
-- [ ] Limpieza cosmética en el servidor (no urgente, no rompe nada): borrar
-      `home/` (carpeta anidada huérfana del primer intento de deploy) y
-      `default.php` (placeholder de Hostinger) de `public_html/` a mano
-      desde el File Manager.
-- [x] Permisos de archivos/carpetas en el servidor — corregidos
-      (2026-07-19) a `755` (carpetas) / `644` (archivos) en todo
-      `public_html/`, recursivo, vía un workflow temporal de un solo uso
-      con `ftplib` de Python (`SITE CHMOD` recorriendo el árbol completo
-      con MLSD/LIST) — ya borrado, mismo patrón que `ftp-debug.yml`.
+- [x] Permisos de archivos/carpetas — corregidos (2026-07-19) a `755`
+      (carpetas) / `644` (archivos), recursivo, vía un workflow temporal
+      de un solo uso con `ftplib` de Python. **Ojo:** esto se aplicó en
+      la carpeta que en ese momento se creía correcta (la del usuario
+      chroot del dominio, `FTP_REMOTE_DIR=/`) — la Ronda 2 después
+      determinó que esa carpeta probablemente NO es la que sirve el
+      sitio realmente (ver punto 8 de la saga). Si hace falta prolijidad
+      de permisos, repetirlo contra la carpeta confirmada como correcta
+      (`/public_html/` con el usuario del sistema).
 
 ## Cómo trabajar en este proyecto
 - Repo separado de RanchOS — no reutilizar convenciones/decisiones de ese
