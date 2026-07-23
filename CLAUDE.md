@@ -51,6 +51,38 @@ servidor de dev devolviendo 404 hasta el fix).
   solo sirve archivos estáticos — no corre Astro ni Node.
 - Sin backend, sin base de datos, sin autenticación.
 
+## Analítica y SEO (2026-07-20, EN PRODUCCIÓN)
+Todo vive en el `<head>` compartido, `src/layouts/Base.astro` — un solo
+lugar para las dos versiones de idioma, nada duplicado por página.
+
+- **Google Tag Manager** (`GTM-P76P9SDJ`) y **Cloudflare Web Analytics**
+  (token `2219e10584ce4c50a116a2fce523de63`, cargado con `defer`) — ambos
+  como `<script is:inline>` en el `<head>`. Sin cookies, sin consent
+  banner (Cloudflare Web Analytics no usa cookies).
+- **Nota sobre el pedido original:** se pidió instalar esto como "el meta
+  tag de verificación de Google Search Console", pero el snippet dado es
+  el contenedor de **Google Tag Manager** (`googletagmanager.com/gtm.js`),
+  no un `<meta name="google-site-verification">`. Son productos
+  distintos — se instaló GTM tal cual se pidió (es además un método
+  válido de verificación de Search Console, si en Search Console se elige
+  "Google Tag Manager" como método). Si hace falta la verificación
+  *directa* de Search Console (el meta tag real), pedirlo aparte.
+- **Sitemap:** `@astrojs/sitemap`, generado en build (`dist/sitemap-index.xml`
+  + `dist/sitemap-0.xml`), incluye las 10 páginas de ambos idiomas
+  automáticamente (no hace falta mantenerlo a mano). **Pineado a la
+  versión `3.4.2` a propósito — no actualizar sin probar primero:** la
+  versión que instala `npm install @astrojs/sitemap` por defecto (3.7.x)
+  rompe el build con este Astro 4.16 (`Cannot read properties of
+  undefined (reading 'reduce')` en el hook `astro:build:done` — cambio de
+  API interno entre versiones, sin `peerDependencies` que lo prevengan).
+- **`robots.txt`**: archivo estático en `public/robots.txt` (ahí SÍ es el
+  mecanismo nativo de Astro — todo lo que vive en `public/` se copia tal
+  cual a la raíz del sitio), con `Allow: /` y referencia al sitemap.
+- **hreflang** (`en`/`es`/`x-default` → inglés): esto **ya existía** desde
+  el scaffold inicial (`Base.astro`, con resolución real vía
+  `translationKey` para posts, no solo entre home pages) — no fue
+  necesario tocarlo, solo verificarlo.
+
 ## Idiomas — inglés es el idioma principal, no el secundario
 El lector #1 es un empleador remoto: **inglés en la raíz**, español en `/es/`
 (existe para tráfico de LinkedIn, audiencia LATAM).
