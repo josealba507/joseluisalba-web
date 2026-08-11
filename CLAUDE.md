@@ -23,6 +23,20 @@ artículo, índice de blog (en/es), About/Contact (en/es) y RSS (en/es) ya
 existen y renderizan. `public/.htaccess` existe (solo `DirectoryIndex`, sin
 los 301 de WordPress todavía — ver Pendientes).
 
+**Posts publicados (2026-08-03):** 2 posts reales en producción, ambos
+bilingües (en/es) vía `translationKey`.
+1. **Decision · №01** — "Average balance isn't calculated. It's captured."
+   / "El saldo promedio no se calcula, se captura"
+   (`average-balance-is-captured.md` / `saldo-promedio-se-captura.md`,
+   `pubDate: 2026-07-20`).
+2. **Governance · №01** — "A copy doesn't have opinions" / "La copia no
+   opina" (`a-copy-has-no-opinions.md` / `la-copia-no-opina.md`,
+   `pubDate: 2026-08-03`, `translationKey: "copia-no-opina-accrual"`) —
+   accrual table vs. final table: por qué guardar solo los cambios de
+   saldo no alcanza para el reporte de cierre de mes, y por qué ese
+   problema lo resuelven 2 tablas con trabajos distintos, no una sola
+   tabla que hace ambas cosas.
+
 **Diseño visual importado desde Claude Design** (2026-07-18): el sistema
 visual (paleta, tipografía, layout de header/footer/hero/índice/artículo)
 viene de un mockup en `claude.ai/design`, proyecto "Portafolio técnico
@@ -302,12 +316,29 @@ diagnóstico, más largo que el primero:
     `deploy.yml` sigue existiendo y puede intentarse, pero cualquier
     corrida debe verificarse después contra el sitio público (no confiar
     en el "✓" de GitHub Actions) — ver Pendientes.
+12. **Actualización (2026-08-04), publicando el segundo post:** el
+    pipeline automático (push → Actions → `lftp mirror`) ya lleva 2
+    corridas exitosas de punta a punta antes de esta (2026-07-21,
+    2026-07-23) — mejor evidencia de la que había al escribir el punto
+    11. Esta vez sí falló en el primer intento: el paso de FTP murió con
+    `cd: Fatal error: max-retries exceeded (Connection timed out)` a los
+    ~4.5 min (ni siquiera llegó a autenticar/listar, timeout de conexión
+    puro) — **`gh run rerun <id> --failed` inmediatamente después
+    corrió limpio en 38s**, sin tocar nada. Lectura: la conexión FTP a
+    esta cuenta de Hostinger sigue siendo intermitente (mismo síntoma de
+    fondo que los puntos 9/11), pero cuando conecta, `mirror` ya no se
+    cuelga como en la Ronda 2 — el fallback recomendado pasó de "subir a
+    mano por File Manager" a **"reintentar la corrida con `gh run
+    rerun --failed` primero"**, mucho más rápido, y solo caer al método
+    manual si el reintento también falla. Verificado con `curl` contra
+    ambas URLs del post nuevo después del reintento exitoso — `200 OK`
+    en ambas, título correcto.
 
 ## Estructura de carpetas (estado real, 2026-07-18)
 ```
 src/
   content/config.ts       Schema de la colección blog (zod)
-  content/blog/en/*.md    Posts en inglés (hoy: 1 de ejemplo, draft:true)
+  content/blog/en/*.md    Posts en inglés (hoy: 2 reales, ver Estado actual)
   content/blog/es/*.md    Posts en español (ídem)
   i18n/ui.ts              Diccionario, rutas por idioma, postUrl()
   utils.ts                readingTime()
@@ -323,20 +354,17 @@ src/
 `public/.htaccess` todavía no existe (ver Pendientes).
 
 ## Pendientes conocidos
-- [ ] **Validar que el deploy 100% automático (push → GitHub Actions →
-      FTP) realmente funciona de punta a punta — NO confirmado todavía.**
-      Después de la Ronda 2 (ver sección de deploy arriba), la ruta
-      correcta cambió (`FTP_REMOTE_DIR=/public_html/` con el usuario
-      "del sistema", no `/` con el usuario chroot del dominio) y el
-      mecanismo (`lftp mirror`) mostró comportamiento poco confiable
-      (éxito reportado sin cambios reales, o cuelgues de +10 min). El
-      sitio está al día en producción hoy porque se subió el build a
-      mano. La próxima vez que se necesite desplegar un cambio, probar
-      primero con `workflow_dispatch` y **verificar contra el sitio
-      público** (no confiar en el ✓ de Actions) antes de asumir que el
-      pipeline automático ya está resuelto. Si vuelve a fallar, el
-      camino manual (`npm run build` local + arrastrar `dist/` al File
-      Manager específico del sitio) sigue siendo el fallback probado.
+- [x] **Validar que el deploy 100% automático (push → GitHub Actions →
+      FTP) funciona de punta a punta** — confirmado con 4 corridas reales
+      contra `main` (2026-07-21, 2026-07-23, y 2 el 2026-08-04 al
+      publicar el segundo post, ver punto 12 de la saga de deploy
+      arriba). La conexión FTP a Hostinger sigue siendo intermitente
+      (la corrida del 2026-08-04 falló una vez con timeout de conexión),
+      pero `gh run rerun <id> --failed` la resuelve en segundos sin
+      necesitar el fallback manual — ese es ahora el primer paso ante
+      cualquier falla, no saltar directo a subir por File Manager.
+      Seguir verificando siempre contra el sitio público con `curl`
+      después de cada deploy (no confiar solo en el ✓ de Actions).
 - [x] Limpieza de la carpeta correcta (2026-07-20) — se sacaron
       `test-upload.txt`, `.ftp-deploy-sync-state.json`, y archivos de
       repo que habían quedado públicamente expuestos por una subida
@@ -368,9 +396,11 @@ src/
       descartó a favor de un pitch corto de disponibilidad.
 - [ ] Endpoint real del formulario de contacto — hoy `contact.astro`/
       `es/contacto.astro` son un `mailto:` simple, no un formulario.
-- [ ] Reemplazar/borrar el post de ejemplo (`draft: true`,
+- [x] Reemplazar/borrar el post de ejemplo (`draft: true`,
       `src/content/blog/en/template-example.md` +
-      `es/ejemplo-plantilla.md`) por el primer post real.
+      `es/ejemplo-plantilla.md`) — hecho, ya no existen en el repo.
+      2 posts reales en producción hoy (ver "Posts publicados" en Estado
+      actual): Decision №01 (2026-07-20) y Governance №01 (2026-08-03).
 - [x] Vaciar el WordPress viejo de `public_html` — hecho por el usuario
       antes de la migración (ver sección de deploy arriba). El plan
       original de "probar primero en subdominio" quedó obsoleto: el
