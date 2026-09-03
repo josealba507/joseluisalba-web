@@ -19,6 +19,34 @@ const enUrl = lang === 'en' ? currentUrl : otherUrl;
 const esUrl = lang === 'es' ? currentUrl : otherUrl;
 
 const year = new Date().getFullYear();
+
+// JSON-LD Person — un solo perfil, compartido por EN/ES (schema.org no
+// distingue idioma por defecto). jobTitle queda en inglés a propósito:
+// es el string que buscan ATS/recruiters, sin importar el idioma de la
+// página que lo sirve.
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'José Luis Alba',
+  jobTitle: ['Senior Data Engineer', 'Analytics Engineer'],
+  url: 'https://joseluisalba.com',
+  sameAs: ['https://github.com/josealba507', 'https://www.linkedin.com/in/joseluisalba/'],
+  knowsAbout: [
+    'BigQuery',
+    'dbt',
+    'PySpark',
+    'Python',
+    'SQL',
+    'Data governance',
+    'Dimensional modeling',
+    'Regulatory reporting',
+  ],
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Panama City',
+    addressCountry: 'PA',
+  },
+};
 ---
 
 <!doctype html>
@@ -63,6 +91,8 @@ const year = new Date().getFullYear();
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
   </head>
   <body>
     <header class="site-header">
