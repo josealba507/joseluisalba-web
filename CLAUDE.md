@@ -23,8 +23,12 @@ artículo, índice de blog (en/es), About/Contact (en/es) y RSS (en/es) ya
 existen y renderizan. `public/.htaccess` existe (solo `DirectoryIndex`, sin
 los 301 de WordPress todavía — ver Pendientes).
 
-**Posts publicados (2026-08-03):** 2 posts reales en producción, ambos
-bilingües (en/es) vía `translationKey`.
+**Posts publicados (actualizado 2026-09-02):** 5 posts reales en
+producción, todos bilingües (en/es) vía `translationKey`. Desde
+2026-08-04, cada uno se recibe ya armado en el formato exacto de archivo
+desde el chat donde se redactan los artículos (prompt/plantilla
+acordado con el usuario — pedirle el prompt si hace falta reconstruirlo)
+y se guarda tal cual, sin reformatear.
 1. **Decision · №01** — "Average balance isn't calculated. It's captured."
    / "El saldo promedio no se calcula, se captura"
    (`average-balance-is-captured.md` / `saldo-promedio-se-captura.md`,
@@ -36,6 +40,39 @@ bilingües (en/es) vía `translationKey`.
    saldo no alcanza para el reporte de cierre de mes, y por qué ese
    problema lo resuelven 2 tablas con trabajos distintos, no una sola
    tabla que hace ambas cosas.
+3. **Decision · №02/№03** — "The model migrates. The reasoning doesn't."
+   / "El modelo se migra, el criterio no"
+   (`the-reasoning-doesnt-migrate.md` / `el-criterio-no-se-migra.md`,
+   `pubDate: 2026-08-10`, `translationKey: "reasoning-does-not-migrate"`)
+   — por qué la misma tabla de accrual que era correcta en tierra (costo
+   fijo, la limitante es disco) se rediseña distinto en nube (costo
+   variable por uso), y por qué la variable que decide es la frecuencia
+   de consulta, no el ambiente.
+4. **Decision · №02/№03** — "The exchange rate isn't just a dimension.
+   It's part of the fact." / "La tasa de cambio no es solo una
+   dimensión, es parte del hecho" (`rate-belongs-to-the-fact.md` /
+   `la-tasa-es-parte-del-hecho.md`, `pubDate: 2026-08-10`,
+   `translationKey: "rate-belongs-to-the-fact"`) — por qué convertir
+   moneda al consultar da el número correcto y aun así es la
+   arquitectura equivocada: el valor convertido es una medida y va en
+   el hecho, no una columna resuelta en cada query.
+   **Nota:** mismo `pubDate` que el post anterior (ambos 2026-08-10) —
+   el número exacto №02 vs №03 dentro de "Decision" depende del orden
+   de `getCollection()` en un empate de fecha (`sort` es estable pero
+   el orden de entrada no está garantizado por Astro), no confirmado
+   cuál muestra cada uno en `Post.astro`. No afecta la URL ni el
+   contenido, solo el rótulo "DECISION · №0X" — revisar si algún día
+   importa el orden exacto.
+5. **Decision · №04** — "You don't count the herd while it's moving.
+   You count it once it settles." / "El hato no se cuenta caminando, se
+   cuenta quieto" (`herd-settles-before-counting.md` /
+   `el-hato-no-se-cuenta-caminando.md`, `pubDate: 2026-09-02`,
+   `translationKey: "herd-settles-before-counting"`) — sobre RanchOS: un
+   test de reconciliación Firestore→BigQuery reportaba falsos positivos
+   por una carrera entre la sync y el `dbt build` manual; el fix técnico
+   fue encadenar el Workflow (esperar a que la sync cierre antes de
+   correr dbt), pero la decisión real fue bajar la frecuencia de sync de
+   3x/día a 1x/noche — el hato hay que contarlo quieto, no caminando.
 
 **Diseño visual importado desde Claude Design** (2026-07-18): el sistema
 visual (paleta, tipografía, layout de header/footer/hero/índice/artículo)
